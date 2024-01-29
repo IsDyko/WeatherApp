@@ -13,6 +13,7 @@ import humidity_icon from '../Assets/humidity.png'
 
 const WeatherApp = () => {
 
+    const [errorMessage, setErrorMessage] = useState("");
     const api_key = "bf5f6b3a9087f6c0c0213ee6aedc7482";
     const [wicon, setWicon] = useState(cloud_icon);
 
@@ -24,61 +25,85 @@ const WeatherApp = () => {
         }
 
         const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${element[0].value}&units=Metric&appid=${api_key}&lang=fr`
-        const weather = await fetch(weatherUrl);
-        const data = await weather.json();
-        const humidity = document.getElementsByClassName("humidity-percent");
-        const wind = document.getElementsByClassName("wind-rate");
-        const temperature = document.getElementsByClassName("weather-temp");
-        const location = document.getElementsByClassName("weather-location");
-        
 
-        humidity[0].innerHTML = data.main.humidity + " %";
-        wind[0].innerHTML = data.wind.speed + " km/h";
-        temperature[0].innerHTML = Math.floor(data.main.temp) + "°c";
-        location[0].innerHTML = data.name;
+        try {
+            const weather = await fetch(weatherUrl);
 
-        if (data.weather[0].icon === "01d" || data.weather[0].icon === "01n")
-        {
-            setWicon(clear_icon);
+            if (!weather.ok)
+            {
+                throw new Error(`Failed to fetch data: ${weather.status}`);
+            }
+            const data = await weather.json();
+            setErrorMessage("");
+
+            const humidity = document.getElementsByClassName("humidity-percent");
+            const wind = document.getElementsByClassName("wind-rate");
+            const temperature = document.getElementsByClassName("weather-temp");
+            const location = document.getElementsByClassName("weather-location");
+            
+    
+            humidity[0].innerHTML = data.main.humidity + " %";
+            wind[0].innerHTML = data.wind.speed + " km/h";
+            temperature[0].innerHTML = Math.floor(data.main.temp) + "°c";
+            location[0].innerHTML = data.name;
+    
+            if (data.weather[0].icon === "01d" || data.weather[0].icon === "01n")
+            {
+                setWicon(clear_icon);
+            }
+            else if (data.weather[0].icon === "02d" || data.weather[0].icon === "02n")
+            {
+                setWicon(cloud_icon);
+            }
+            else if (data.weather[0].icon === "03d" || data.weather[0].icon === "03n")
+            {
+                setWicon(drizzle_icon);
+            }
+            else if (data.weather[0].icon === "04d" || data.weather[0].icon === "04n")
+            {
+                setWicon(drizzle_icon);
+            }
+            else if (data.weather[0].icon === "09d" || data.weather[0].icon === "09n")
+            {
+                setWicon(rain_icon);
+            }
+            else if (data.weather[0].icon === "10d" || data.weather[0].icon === "10n")
+            {
+                setWicon(rain_icon);
+            }
+            else if (data.weather[0].icon === "13d" || data.weather[0].icon === "13n")
+            {
+                setWicon(snow_icon);
+            }
+            else
+            {
+                setWicon(clear_icon);
+            }
         }
-        else if (data.weather[0].icon === "02d" || data.weather[0].icon === "02n")
+        catch (error)
         {
-            setWicon(cloud_icon);
-        }
-        else if (data.weather[0].icon === "03d" || data.weather[0].icon === "03n")
-        {
-            setWicon(drizzle_icon);
-        }
-        else if (data.weather[0].icon === "04d" || data.weather[0].icon === "04n")
-        {
-            setWicon(drizzle_icon);
-        }
-        else if (data.weather[0].icon === "09d" || data.weather[0].icon === "09n")
-        {
-            setWicon(rain_icon);
-        }
-        else if (data.weather[0].icon === "10d" || data.weather[0].icon === "10n")
-        {
-            setWicon(rain_icon);
-        }
-        else if (data.weather[0].icon === "13d" || data.weather[0].icon === "13n")
-        {
-            setWicon(snow_icon);
-        }
-        else
-        {
-            setWicon(clear_icon);
+            console.error("An error occurred while fetching weather data:", error);
+            setErrorMessage("Failed to fetch weather data. Please try again later."); // Update the state to show error message
         }
     }
+
+    const handleKeyDown = async (event) => {
+        if (event.key === 'Enter')
+        {
+            await search();
+        }        
+    }
+    
     
   return (
     <div className='container'>
         <div className="top-bar">
-            <input type="text" className="city-input" placeholder='Search'/>
+            <input type="text" className="city-input" placeholder='Search' onKeyDown={handleKeyDown}/>
             <div className="search-icon" onClick={()=>{search()}}>
                 <img src={seach_icon} alt="" draggable={false} />
             </div>
         </div>
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
         <div className="weather-image">
             <img src={wicon} alt="" draggable={false} />
         </div>

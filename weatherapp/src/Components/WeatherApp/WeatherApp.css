@@ -89,3 +89,20 @@
 .icon{
     margin-top: 10px;
 }
+
+.error-message{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    margin-top: 5px;
+    width: 480px;
+    height: 50px;
+    background: red;
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    color: white;
+    font-size: 20px;
+    font-weight: 400;
+}
