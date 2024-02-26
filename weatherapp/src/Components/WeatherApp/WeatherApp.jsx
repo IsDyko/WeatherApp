@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './WeatherApp.css'
 
 import seach_icon from '../Assets/search.png' 
@@ -93,8 +93,29 @@ const WeatherApp = () => {
             await search();
         }        
     }
-    
-    
+    const [location, setLocation] = useState(null);
+    const [error, setError] = useState(null);
+  
+    const getLocation = () => {
+      if (!navigator.geolocation) {
+        setError('Geolocation is not supported by your browser');
+        return;
+      }
+  
+      navigator.geolocation.getCurrentPosition((position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      }, (error) => {
+        setError(error.message);
+      });
+    };
+  
+    useEffect(() => {
+      getLocation();
+    }, []);
+
   return (
     <div className='container'>
         <div className="top-bar">
